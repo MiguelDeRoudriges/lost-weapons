@@ -1,0 +1,10 @@
+# Dependency directories
+node_modules
+
+#dotenv
+.env
+
+#logs
+logs
+*.log
+npm-debug.log*
