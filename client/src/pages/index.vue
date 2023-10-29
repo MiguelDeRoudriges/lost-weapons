@@ -35,6 +35,14 @@ div
           :chart-height="450",
           :series="mapIndustriesSeries(weaponsModels)"
         )
+      .col-12.col-md-12
+        chart(
+          :idKey="'columnChart'",
+          title="Розподіл зброї за Роками",
+          subtitle="Аналіз загубленних моделей зброї за роками",
+          point-interval-unit="year"
+          :series="mapYearsSeries(weaponsYears)"
+        )
     .p-3.p-md-3
       .text-center 
         h1 Як купити API
@@ -60,6 +68,7 @@ import { addToLocalStorage } from "@/utils/localeStorage.js";
 const weaponsURL = "http://localhost:3000/weapons";
 const weaponsRegionsURL = "http://localhost:3000/weapons/regionStatistics";
 const weaponsModelsURL = "http://localhost:3000/weapons/modelsStatistics";
+const weaponsYearsURL = "http://localhost:3000/weapons/yearsStatistics";
 
 const regionMapping = {
   ЛУГАНС: "ua-lh",
@@ -113,6 +122,7 @@ export default {
       const { data: weapons } = await getData(weaponsURL);
       const { data: weaponsRegions } = await getData(weaponsRegionsURL);
       const { data: weaponsModels } = await getData(weaponsModelsURL);
+      const { data: weaponsYears } = await getData(weaponsYearsURL);
 
       const todayDate = formatDate(new Date());
       const lastWeekDate = formatDate(
@@ -146,6 +156,7 @@ export default {
         weaponsModels,
         weaponByDate,
         weaponSinceInvasion,
+        weaponsYears,
         count: weapons.count,
         status: 200,
       };
@@ -224,6 +235,21 @@ export default {
         type:
           this.query.type === "number" ? "За номером" : "За серією і номером",
       });
+    },
+    mapYearsSeries(data) {
+      const last20Data = data.slice(-20);
+      const [startDate] = last20Data;
+      const yearsCount = last20Data.map(({ count }) => count);
+
+      return [
+        {
+          name: "Одиниць",
+          type: "column",
+          pointStart: Date.UTC(startDate.year),
+          pointInterval: 1,
+          data: yearsCount,
+        },
+      ];
     },
     mapIndustriesSeries(data) {
       const topFiveMapped = data

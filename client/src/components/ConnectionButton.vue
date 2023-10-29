@@ -1,8 +1,8 @@
 <template lang="pug">
 button.btn.btn-primary.btn-lg.mb-4(type='button' data-bs-toggle='modal' data-bs-target='#connectionModal') Отримати консультацію
-#connectionModal.modal.fade(tabindex='-1' aria-labelledby='connectionModalLabel' aria-hidden='true')
+#connectionModal.modal.fade(tabindex='-1' aria-labelledby='connectionModalLabel' aria-hidden='true' )
   .modal-dialog.modal-dialog-centered.modal-dialog-scrollable
-    .modal-content
+    .modal-content(v-if="!isSuccessfulSubmit")
       .modal-header
         h1.modal-title.fs-5#connectionModalLabel Заявка на корпоративне підключення
         button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
@@ -27,6 +27,14 @@ button.btn.btn-primary.btn-lg.mb-4(type='button' data-bs-toggle='modal' data-bs-
             | та 
             a.link-body-emphasis.opacity-50(href='https://policies.google.com/terms') умови використання 
             | сервісів Гугл
+    .modal-content(v-else)
+      .container.p-4
+        .row
+          .col
+            p.text-center Дякуємо, ми зателефонуємо найближчим часом
+        .row
+          .col.text-center
+            button.btn.btn-primary(data-bs-dismiss="modal") Дякую
 </template>
 
 <script>
@@ -42,6 +50,7 @@ export default {
   data() {
     return {
       loading: false,
+      isSuccessfulSubmit: false,
       fields: [
         {
           name: "name",
@@ -76,6 +85,7 @@ export default {
 
       setTimeout(() => {
         this.loading = false;
+        this.isSuccessfulSubmit = true;
       }, 500);
     },
   },

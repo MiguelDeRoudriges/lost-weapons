@@ -248,9 +248,49 @@ export const getNewWeaponsStatistics = async ({ dateFrom, dateTo }) => {
   };
 };
 
+export const getYearsWeaponsStatistics = async (req) => {
+  const pipline = [
+    {
+      $addFields: {
+        insertDate: {
+          $toDate: "$insertDate",
+        },
+      },
+    },
+    {
+      $match: {
+        insertDate: {
+          $gte: new Date("1970-01-01T00:00:00Z"),
+        },
+      },
+    },
+    {
+      $group: {
+        _id: { $year: "$insertDate" },
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $sort: { _id: 1 },
+    },
+    {
+      $project: {
+        year: "$_id",
+        count: 1,
+        _id: 0,
+      },
+    },
+  ];
+
+  const aggregationResult = await WeaponModel.aggregate(pipline);
+
+  return aggregationResult;
+};
+
 export default {
   getAllWeapons,
   getWeaponsRegionStatistics,
   getWeaponsModelsStatistics,
   getNewWeaponsStatistics,
+  getYearsWeaponsStatistics,
 };
