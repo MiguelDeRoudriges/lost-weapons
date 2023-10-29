@@ -9,7 +9,11 @@ section
 <script>
 import Highcharts from "highcharts";
 
-import { isMonochromatic, generalOptions } from "@/utils/highcharts.js";
+import {
+  isMonochromatic,
+  generalOptions,
+  translatedOptions,
+} from "@/utils/highcharts.js";
 
 export default {
   props: {
@@ -36,6 +40,13 @@ export default {
     idKey: {
       type: String,
       default: "",
+    },
+    pointIntervalUnit: {
+      type: String,
+      default: "month",
+      validator(value) {
+        return ["day", "month", "year", "quarter"].includes(value);
+      },
     },
     pointFormatter: {
       type: Function,
@@ -83,7 +94,9 @@ export default {
         subtitle: {
           text: this.subtitle,
         },
-        xAxis: this.xAxis,
+        xAxis: {
+          type: "datetime",
+        },
         logotype: this.computedLogotype,
         credits: {
           enabled: false,
@@ -117,6 +130,15 @@ export default {
               },
             },
             innerSize: "60%",
+          },
+          column: {
+            borderRadius: 2,
+            tooltip: {
+              shared: true,
+              useHTML: true,
+              headerFormat:
+                "<span style='font-size: 14px;color:#666'>{point.key}</span> <br>",
+            },
           },
           pie: {
             borderRadius: 4,
@@ -186,7 +208,7 @@ export default {
     },
   },
   mounted() {
-    Highcharts.setOptions({ ...generalOptions, lang: "uk" });
+    Highcharts.setOptions({ ...generalOptions, lang: translatedOptions });
 
     this.chart = Highcharts.chart(this.idKey, {
       ...this.chartOptions,
@@ -227,7 +249,8 @@ export default {
     resizeChart() {
       const { chart } = this;
       const { width } = this.computedLogotype;
-      this.logotypeImage = chart && chart.container.querySelector(".logo-img-" + this.idKey);
+      this.logotypeImage =
+        chart && chart.container.querySelector(".logo-img-" + this.idKey);
       if (this.logotypeImage) {
         try {
           this.logotypeImage.setAttribute(

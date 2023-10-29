@@ -15,7 +15,7 @@
       .fs-2 Нічого не знайдено
       p Спробуйте ще раз
   .p-2
-  .row.row-cols-1.row-cols-md-2
+  .row.row-cols-1.row-cols-md-2.g-3
     .col(v-for="weapon in formatCards(weapons)")
       cards(:options="weapon", :showPlaceholders="isLoading")
   .p-3

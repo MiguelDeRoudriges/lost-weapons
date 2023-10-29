@@ -76,3 +76,14 @@ export const getNewWeaponsStatistics = async (req, res) => {
     httpResponseError(res, error);
   }
 };
+
+export const getYearsWeaponsStatistics = async (req, res) => {
+  try {
+
+    const weapons = await weaponsService.getYearsWeaponsStatistics();
+
+    httpResponse(res, generalStatus.SUCCESS, weapons);
+  } catch (error) {
+    httpResponseError(res, error);
+  }
+};

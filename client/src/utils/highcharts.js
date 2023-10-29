@@ -68,6 +68,57 @@ export const generalOptions = {
   ],
 };
 
+export const translatedOptions = {
+  loading: "Завантаження...",
+  months: [
+    "Січень",
+    "Лютий",
+    "Березень",
+    "Квітень",
+    "Травень",
+    "Червень",
+    "Липень",
+    "Серпень",
+    "Вереснь",
+    "Жовтень",
+    "Листопад",
+    "Грудень",
+  ],
+  weekdays: [
+    "Неділя",
+    "Понеділок",
+    "Вівторок",
+    "Середа",
+    "Четвер",
+    'П"ятниця',
+    "Субота",
+  ],
+  shortMonths: [
+    "Січ",
+    "Лют",
+    "Бер",
+    "Кві",
+    "Тра",
+    "Чер",
+    "Лип",
+    "Сер",
+    "Вер",
+    "Жов",
+    "Лис",
+    "Гру",
+  ],
+  exportButtonTitle: "Експорт",
+  printButtonTitle: "Друкувати",
+  rangeSelectorFrom: "З",
+  rangeSelectorTo: "По",
+  rangeSelectorZoom: "Період",
+  downloadPNG: "Скачати PNG",
+  downloadJPEG: "Скачати JPEG",
+  downloadPDF: "Скачати PDF",
+  downloadSVG: "Скачати SVG",
+  printChart: "Надрукувати графік",
+};
+
 export function isMonochromatic(color) {
   const reRGBHex = /^(?:[0-9a-fA-F]{6})$/;
 
