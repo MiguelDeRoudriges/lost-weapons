@@ -19,6 +19,8 @@ downloaded=""
 dataset_key=$DATASET_KEY
 dataset_directory=$DATASET_DIRECTORY
 
+echo "Downloading dataset: $dataset_key"
+
 command="--dir $dataset_directory --dataset $dataset_key"
 if bin/download-dataset.sh $command; then
     echo "Command succeeded: $command";
