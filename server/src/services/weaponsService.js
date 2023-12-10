@@ -252,21 +252,21 @@ export const getYearsWeaponsStatistics = async (req) => {
   const pipline = [
     {
       $addFields: {
-        insertDate: {
-          $toDate: "$insertDate",
+        theftDate: {
+          $toDate: "$theftDate",
         },
       },
     },
     {
       $match: {
-        insertDate: {
+        theftDate: {
           $gte: new Date("1970-01-01T00:00:00Z"),
         },
       },
     },
     {
       $group: {
-        _id: { $year: "$insertDate" },
+        _id: { $year: "$theftDate" },
         count: { $sum: 1 },
       },
     },
