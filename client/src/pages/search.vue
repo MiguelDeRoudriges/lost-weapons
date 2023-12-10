@@ -1,31 +1,31 @@
 <template lang="pug">
 .container
-  form(@submit.prevent)
-    .position-relative
-      .position-absolute.top-50.start-0.translate-middle.ps-5
-        transition(name="bounce")
-          i.bi.bi-search
-      input.form-control.form-control-lg.ps-5(
-        v-model.trim="searchText",  
-        :placeholder="placeholder", 
-        type='search', 
-        aria-label='Search'
-      )
-    .p-3(v-if="searchText.length > 2 && weapons && count === 0")
-      .fs-2 Нічого не знайдено
-      p Спробуйте ще раз
-  .p-2
-  .row.row-cols-1.row-cols-md-2.g-3
-    .col(v-for="weapon in formatCards(weapons)")
-      cards(:options="weapon", :showPlaceholders="isLoading")
+  .py-3.px-3(v-cloak)
+    .mx-auto.max-w-md
+      search-form(@submit-search="getAPIrequest", :initial-text="searchText")
+    .p-1
+    small
+      span(v-if="count > 0") Знайдено {{ formatNumber(count) }} {{ declension(count, ["одиниця", "одиниці", "одиниць"]) }}
+      span(v-else) Моделей зброї не знайдено
+    .p-0
+    h1.mb-0 Моделі зброї
+  .p-lg-3.rounded-3.mb-2
+    .row.row-cols-1.row-cols-md-2.g-3
+      .col(v-for="weapon in formatCards(weapons)")
+        cards(:options="weapon", :showPlaceholders="isLoading")
   .p-3
 </template>
 
 <script>
+import { useHead } from "@vueuse/head";
+
 import Cards from "@/components/Cards.vue";
+import SearchForm from "@/components/SearchForm.vue";
 
 import { getData } from "@/services/api/http.js";
 import { getHumanDate } from "@/utils/date.js";
+
+import { addToLocalStorage } from "@/utils/localeStorage.js";
 
 const weaponsURL = "http://localhost:3000/weapons?";
 const SEARCH_LIMIT = 12;
@@ -48,6 +48,7 @@ function error({ writeResponse, code }) {
 export default {
   components: {
     Cards,
+    SearchForm,
   },
   async prefetch({ to, writeResponse, router }) {
     try {
@@ -80,63 +81,47 @@ export default {
       placeholder: "Введіть серію та (або) номер зброї",
     };
   },
-  watch: {
-    async searchText(newText) {
-      clearTimeout(this.timeoutID);
+  created() {
+    const text = this.$route.query.q || "";
 
-      if (newText.length < 3) {
-        this.addUrlParams(this.$router);
+    const { path } = this.$route;
 
-        this.weapons = await this.getCards(this.formatApiParams(newText)).data;
-        this.count = await this.getCards(this.formatApiParams(newText)).count;
+    const title = `Пошук ${text} за серію та (або) номер зброї на Infohorizon: Деталізована Інформація, історія використання і місцезнаходження втрачених або викрадених ${text}`;
+    const description = `Знайдіть повну інформацію про модель ${text} в Україні на Infohorizon. Інформація про виробника, тип, вид, серію, номер, калібр, кількість стволів та рік виробництва. Отримайте доступ до бази даних зброї - Infohorizon.`;
 
-        return;
-      }
-
-      this.timeoutID = setTimeout(async () => {
-        this.isLoading = true;
-
-        this.addUrlParams(this.$router, { q: newText });
-
-        setTimeout(async () => {
-          this.weapons = await this.getCards(this.formatApiParams(newText))
-            .data;
-          this.count = await this.getCards(this.formatApiParams(newText)).count;
-          this.isLoading = false;
-        }, 500);
-      }, 2000);
-    },
+    useHead({
+      title,
+      description,
+      path,
+    });
   },
   methods: {
-    addUrlParams(router, text = {}) {
-      return router.push({
-        path: this.$route.path,
-        query: text,
+    async getAPIrequest(input) {
+      this.query = this.getUrlQueryType(input);
+
+      if (input) {
+        window.location.assign("/search?" + new URLSearchParams({ q: input }));
+      }
+
+      addToLocalStorage("weaponsSuggests", {
+        text: this.query.text,
+        type:
+          this.query.type === "number" ? "За номером" : "За серією і номером",
       });
     },
-    formatApiParams(newText) {
-      const params =
-        newText.length < 3
-          ? { offset: this.offset, limit: this.limit }
-          : {
-              searchKeys,
-              searchQuery: newText,
-              limit: SEARCH_LIMIT,
-            };
-
-      return {
-        params,
-        endPoint: weaponsURL,
-      };
+    getUrlQueryType(text) {
+      const isNumber = /^\d+$/.test(text);
+      return isNumber ? { type: "number", text } : { type: "series", text };
     },
-    async getCards({ params, endPoint }) {
-      const {
-        data: { data, count },
-      } = await getData(endPoint, params, this.$route.path);
-
-      if (!data) return [];
-
-      return { data, count };
+    formatNumber(number) {
+      return number.toLocaleString("uk-UA");
+    },
+    declension(number, declinations) {
+      const cases = [2, 0, 1, 1, 1, 2];
+      const n = Math.abs(number);
+      return declinations[
+        n % 100 > 4 && n % 100 < 20 ? 2 : cases[n % 10 < 5 ? n % 10 : 5]
+      ];
     },
     formatCards(cards) {
       if (!cards) return [];
@@ -206,3 +191,11 @@ export default {
   },
 };
 </script>
+
+<style lang="sass">
+.max-w-md
+  max-width: 720px
+
+h1
+  font-size: calc(0.9rem + 1vw)
+</style>
