@@ -199,9 +199,6 @@ export default {
           title: {
             text: "",
           },
-          visible: false,
-          endOnTick: false,
-          maxPadding: 0.1,
         },
         series: this.series,
       };
