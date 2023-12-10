@@ -237,7 +237,7 @@ export default {
       });
     },
     mapYearsSeries(data) {
-      const last20Data = data.slice(-20);
+      const last20Data = data.slice(-11);
       const [startDate] = last20Data;
       const yearsCount = last20Data.map(({ count }) => count);
 
