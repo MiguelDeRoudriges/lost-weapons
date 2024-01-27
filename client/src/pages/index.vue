@@ -17,15 +17,14 @@ div
       .col(v-for="widget in weaponsDateByWeekWidget")
         digits-widget(:options="widget")
     .p-2
-    .row 
+    .row.g-3
       .col-12.col-md-6
         map-chart(
-          :map-data="transformData(weaponsRegions)",
+          :map-data="transformData(weaponsRegions, regionMapping)",
           title="Розподіл зброї по Регіонах",
           subtitle="Статистика зброї за регіонами України",
           :disable-data-labels="false",
         )
-        .p-2
       .col-12.col-md-6
         chart(
           :idKey="'chartPie'",
@@ -43,7 +42,7 @@ div
           point-interval-unit="year"
           :series="mapYearsSeries(weaponsYears)"
         )
-    .p-3.p-md-3
+    .p-5.p-md-5
       .text-center 
         h1 Як купити API
         p.lead Корпоративні сервіси Infohorizon
@@ -52,8 +51,6 @@ div
 </template>
 
 <script>
-import { useHead } from "@vueuse/head";
-
 import SearchForm from "@/components/SearchForm.vue";
 import MapChart from "@/components/MapChart.vue";
 import Chart from "@/components/Chart.vue";
@@ -101,11 +98,17 @@ const regionMapping = {
   ЛЬВІВ: "ua-lv",
 };
 
-export function formatDate(date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-    2,
-    "0"
-  )}-${String(date.getDate()).padStart(2, "0")}`;
+function processNotFound(writeResponse, router) {
+  router.push({ name: "NotFound" });
+  return error({ writeResponse, code: 404 });
+}
+
+function error({ writeResponse, code }) {
+  writeResponse({
+    status: code,
+    headers: {},
+  });
+  return { status: code };
 }
 
 export default {
@@ -117,12 +120,26 @@ export default {
     DigitsWidget,
     ConnectionButton,
   },
-  async prefetch() {
+  async prefetch({ to, head, router, writeResponse }) {
     try {
       const { data: weapons } = await getData(weaponsURL);
       const { data: weaponsRegions } = await getData(weaponsRegionsURL);
       const { data: weaponsModels } = await getData(weaponsModelsURL);
       const { data: weaponsYears } = await getData(weaponsYearsURL);
+
+      const padWithZeros = (number, length) =>
+        String(number).padStart(length, "0");
+
+      const extractAndFormat = (date, extractor, length) =>
+        padWithZeros(extractor(date), length);
+
+      const formatDate = (date) => {
+        const year = extractAndFormat(date, (d) => d.getFullYear(), 4);
+        const month = extractAndFormat(date, (d) => d.getMonth() + 1, 2);
+        const day = extractAndFormat(date, (d) => d.getDate(), 2);
+
+        return `${year}-${month}-${day}`;
+      };
 
       const todayDate = formatDate(new Date());
       const lastWeekDate = formatDate(
@@ -151,6 +168,17 @@ export default {
         0
       );
 
+      const { query } = to;
+      const { text = "" } = query;
+
+      const title = `Infohorizon: Пошук та Аналіз Зброї в Україні`;
+      const description = `Infohorizon надає доступ до деталізованої інформації про зброю, яка перебуває в розшуку в Україні через викрадення або втрату. Оглядайте статистику по регіонах та моделям, та дізнавайтеся, як купити доступ до нашого API.`;
+
+      head.addHeadObjs({
+        title,
+        meta: [description],
+      });
+
       return {
         weaponsRegions,
         weaponsModels,
@@ -158,10 +186,12 @@ export default {
         weaponSinceInvasion,
         weaponsYears,
         count: weapons.count,
+        regionMapping,
+        text,
         status: 200,
       };
     } catch (error) {
-      console.log(error);
+      return processNotFound(writeResponse, router);
     }
   },
   computed: {
@@ -185,7 +215,6 @@ export default {
   },
   data() {
     return {
-      text: "",
       benefits: [
         {
           title: "Пошук Зброї",
@@ -207,20 +236,6 @@ export default {
         },
       ],
     };
-  },
-  created() {
-    this.text = this.$route.q;
-
-    const { path } = this.$route;
-
-    const title = `Infohorizon: Пошук та Аналіз Зброї в Україні`;
-    const description = `Infohorizon надає доступ до деталізованої інформації про зброю, яка перебуває в розшуку в Україні через викрадення або втрату. Оглядайте статистику по регіонах та моделям, та дізнавайтеся, як купити доступ до нашого API.`;
-
-    useHead({
-      title,
-      description,
-      path,
-    });
   },
   methods: {
     async getAPIrequest(input) {
@@ -266,34 +281,47 @@ export default {
         },
       ];
     },
-    transformData(data) {
-      const regionCounts = new Map();
+    transformData(data, regionMapping) {
+      const initializeRegionCounts = (regionMapping) => {
+        return new Map(Object.values(regionMapping).map((code) => [code, 0]));
+      };
 
-      for (let code of Object.values(regionMapping)) {
-        regionCounts.set(code, 0);
-      }
+      const generateRegexPattern = (regionMapping) => {
+        const regionsBase = Object.keys(regionMapping).join("|");
+        return new RegExp(`(${regionsBase})`, "iu");
+      };
 
-      const regionsBase = Object.keys(regionMapping).join("|");
-      const regexPattern = new RegExp(`(${regionsBase})`, "iu");
-
-      for (let item of data) {
+      const updateRegionCounts = (
+        regionCounts,
+        item,
+        regexPattern,
+        regionMapping
+      ) => {
         const match = item.organUnit?.match(regexPattern);
         if (match && match[0]) {
           const regionName =
             match[0].toUpperCase() + (match[0].endsWith("Ь") ? "К" : "");
           const regionCode = regionMapping[regionName];
           if (regionCode) {
-            regionCounts.set(
+            return new Map(regionCounts).set(
               regionCode,
               (regionCounts.get(regionCode) || 0) + item.count
             );
           }
         }
-      }
+        return regionCounts;
+      };
 
-      const result = Array.from(regionCounts.entries());
+      const regionCounts = initializeRegionCounts(regionMapping);
+      const regexPattern = generateRegexPattern(regionMapping);
 
-      return result;
+      const finalRegionCounts = data.reduce(
+        (counts, item) =>
+          updateRegionCounts(counts, item, regexPattern, regionMapping),
+        regionCounts
+      );
+
+      return Array.from(finalRegionCounts.entries());
     },
     getUrlQueryType(text) {
       const isNumber = /^\d+$/.test(text);

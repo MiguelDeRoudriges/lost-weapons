@@ -2,8 +2,8 @@ export async function getData(endpoint, options, url, headers = {}) {
   const searchParams = new URLSearchParams(options);
 
   try {
+    const response = await fetch(endpoint + searchParams, { headers });
 
-    const response = await fetch(endpoint + searchParams, { headers: headers });
     if (!response.ok) {
       throw new Error(response.status, url);
     }

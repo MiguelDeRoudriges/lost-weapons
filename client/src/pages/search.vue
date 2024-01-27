@@ -58,9 +58,14 @@ export default {
 
       const offset = query.offset || 0;
 
+      const getSearchKey = (text) => {
+        const isNumber = /^\d+$/.test(text);
+        return isNumber ? "weaponNumber" : "weaponNumber,weaponSeries";
+      };
+
       const params = {
         searchQuery: query.q || "",
-        searchKeys,
+        searchKeys: getSearchKey(query.q),
         limit: SEARCH_LIMIT,
         offset,
       };

@@ -112,6 +112,8 @@ export const getAllWeapons = async ({
   if (searchKeys && searchQuery) {
     const keysArray = searchKeys.split(",");
 
+    // console.log(keysArray);
+
     if (
       keysArray.includes("weaponNumber") &&
       keysArray.includes("weaponSeries")
@@ -129,16 +131,28 @@ export const getAllWeapons = async ({
         { weaponSeries: seriesPart },
       ];
 
-      match.$and = conditions.filter((condition) => {
-        const key = Object.keys(condition)[0];
+      console.log(conditions);
+
+      const filterConditions = (condition) => {
+        const [key] = Object.keys(condition);
         return condition[key] && condition[key].trim() !== "";
-      });
+      };
+
+      // // Показывает по любому номеру и любой серии
+      // match.$and = conditions.filter(filterConditions);
+
+      // Показывает только серия и номер, если нету одного из них, то ничего не показывает
+      match.$and = conditions;
+
+      // console.log(match);
     } else {
       match.$or = keysArray.map((key) => ({
         [`${key.trim()}`]: searchQuery,
       }));
     }
   }
+
+  console.log(match);
 
   const sortObject = {};
   if (sortKeys) {
@@ -148,6 +162,8 @@ export const getAllWeapons = async ({
   }
 
   const aggregationArray = [{ $match: match }];
+
+  console.log();
 
   if (Object.keys(sortObject).length > 0) {
     aggregationArray.push({ $sort: sortObject });
