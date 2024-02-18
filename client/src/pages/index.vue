@@ -62,10 +62,10 @@ import { getData } from "@/services/api/http.js";
 
 import { addToLocalStorage } from "@/utils/localeStorage.js";
 
-const weaponsURL = "http://localhost:3000/weapons";
-const weaponsRegionsURL = "http://localhost:3000/weapons/regionStatistics";
-const weaponsModelsURL = "http://localhost:3000/weapons/modelsStatistics";
-const weaponsYearsURL = "http://localhost:3000/weapons/yearsStatistics";
+const weaponsURL = "http://backend:3000/weapons";
+const weaponsRegionsURL = "http://backend:3000/weapons/regionStatistics";
+const weaponsModelsURL = "http://backend:3000/weapons/modelsStatistics";
+const weaponsYearsURL = "http://backend:3000/weapons/yearsStatistics";
 
 const regionMapping = {
   ЛУГАНС: "ua-lh",

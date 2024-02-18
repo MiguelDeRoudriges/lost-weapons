@@ -2,12 +2,12 @@
 # Lost Passports registry
 
 DATABASE_NAME='registry'
-MONGODB_URL='mongodb://localhost:27017/registry'
+MONGODB_URL='mongodb://mongodb:27017/registry'
 
 # Dataset key from datagov 
 DATASET_KEY="5e7a9e93-e4ae-408a-8b99-6a21bfa9c12a"
 
-DATASET_DIRECTORY="/Users/mykhailosvyrydov/Desktop/weapon-registry/downloads/weapons"
+DATASET_DIRECTORY="/scripts"
 
 # Source file
 SOURCE_FILE="weaponswanted.json"

@@ -1,0 +1,30 @@
+services:
+  frontend:
+    image: frontend
+    build:
+      context: ./client
+    ports:
+      - "80:8080"
+      - "4443:443"
+    volumes:
+      - ssl-certs:/ssl-certs
+  certbot:
+    image: certbot/certbot:latest
+    entrypoint: ["/bin/sh", "-c", "sleep 3000"]
+    volumes:
+      - ssl-certs:/ssl-certs
+  backend:
+    image: backend
+    build:
+      context: ./server
+    ports:
+      - "3000:3000"
+  mongodb:
+    image: mongo:7.0.5
+  scripts:
+    image: scripts
+    build:
+      context: ./bash
+
+volumes:
+  ssl-certs:
