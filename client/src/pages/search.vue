@@ -27,7 +27,7 @@ import { getHumanDate } from "@/utils/date.js";
 
 import { addToLocalStorage } from "@/utils/localeStorage.js";
 
-const weaponsURL = "http://localhost:3000/weapons?";
+const weaponsURL = "http://backend:3000/weapons?";
 const SEARCH_LIMIT = 12;
 
 const searchKeys = "weaponNumber,weaponSeries";
