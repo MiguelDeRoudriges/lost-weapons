@@ -6,13 +6,6 @@ services:
     ports:
       - "80:8080"
       - "4443:443"
-    volumes:
-      - ssl-certs:/ssl-certs
-  certbot:
-    image: certbot/certbot:latest
-    entrypoint: ["/bin/sh", "-c", "sleep 3000"]
-    volumes:
-      - ssl-certs:/ssl-certs
   backend:
     image: backend
     build:
@@ -25,6 +18,3 @@ services:
     image: scripts
     build:
       context: ./bash
-
-volumes:
-  ssl-certs:
