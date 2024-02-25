@@ -1,3 +1,5 @@
+![Infohorizon](https://cronitor.io/badges/4ljCLp/production/HXRuC_irYErzR404JyPAMwj21Js.svg)
+
 # lost-weapons Project Setup
 
 **Clone the repository**: `git clone https://github.com/MiguelDeRoudriges/lost-weapons`
