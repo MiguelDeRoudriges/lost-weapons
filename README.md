@@ -1,4 +1,4 @@
-![Infohorizon](https://cronitor.io/badges/4ljCLp/production/HXRuC_irYErzR404JyPAMwj21Js.svg)
+![Infohorizon](https://cronitor.io/badges/4ljCLp/production/HXRuC_irYErzR404JyPAMwj21Js.svg)\
 https://infohorizon.yvhn.io/
 # lost-weapons Project Setup
 
