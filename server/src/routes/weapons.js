@@ -9,10 +9,10 @@ import {
 
 const router = express.Router();
 
-router.get("/weapons", getAllWeapons);
-router.get("/weapons/regionStatistics", getWeaponsRegionStatistics);
-router.get("/weapons/modelsStatistics", getWeaponsModelsStatistics);
-router.get("/weapons/newStatistics", getNewWeaponsStatistics);
-router.get("/weapons/yearsStatistics", getYearsWeaponsStatistics);
+router.get("/api/weapons", getAllWeapons);
+router.get("/api/weapons/regionStatistics", getWeaponsRegionStatistics);
+router.get("/api/weapons/modelsStatistics", getWeaponsModelsStatistics);
+router.get("/api/weapons/newStatistics", getNewWeaponsStatistics);
+router.get("/api/weapons/yearsStatistics", getYearsWeaponsStatistics);
 
 export default router;

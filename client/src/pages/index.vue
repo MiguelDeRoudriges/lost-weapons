@@ -62,10 +62,14 @@ import { getData } from "@/services/api/http.js";
 
 import { addToLocalStorage } from "@/utils/localeStorage.js";
 
-const weaponsURL = "http://backend:3000/weapons";
-const weaponsRegionsURL = "http://backend:3000/weapons/regionStatistics";
-const weaponsModelsURL = "http://backend:3000/weapons/modelsStatistics";
-const weaponsYearsURL = "http://backend:3000/weapons/yearsStatistics";
+import { getMeta } from "@/utils/seo.js";
+
+import { useHead } from "@vueuse/head";
+
+const weaponsURL = "http://backend:3000/api/weapons";
+const weaponsRegionsURL = "http://backend:3000/api/weapons/regionStatistics";
+const weaponsModelsURL = "http://backend:3000/api/weapons/modelsStatistics";
+const weaponsYearsURL = "http://backend:3000/api/weapons/yearsStatistics";
 
 const regionMapping = {
   ЛУГАНС: "ua-lh",
@@ -111,6 +115,35 @@ function error({ writeResponse, code }) {
   return { status: code };
 }
 
+async function executePromisesWithLimit(concurrency, tasks) {
+  try {
+    const taskChunks = Array(Math.ceil(tasks.length / concurrency))
+      .fill()
+      .map((_, index) =>
+        tasks.slice(index * concurrency, (index + 1) * concurrency)
+      );
+
+    const results = [];
+    for (const chunk of taskChunks) {
+      const batchResults = await Promise.allSettled(
+        chunk.map((task) => task())
+      );
+
+      const modifiedResults = batchResults.map((result) =>
+        result.status === "rejected"
+          ? { ...result, message: result.reason.message }
+          : result
+      );
+
+      results.push(...modifiedResults);
+    }
+    return results;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
 export default {
   components: {
     SearchForm,
@@ -120,12 +153,19 @@ export default {
     DigitsWidget,
     ConnectionButton,
   },
-  async prefetch({ to, head, router, writeResponse }) {
+  async prefetch({ to, router, writeResponse }) {
     try {
-      const { data: weapons } = await getData(weaponsURL);
-      const { data: weaponsRegions } = await getData(weaponsRegionsURL);
-      const { data: weaponsModels } = await getData(weaponsModelsURL);
-      const { data: weaponsYears } = await getData(weaponsYearsURL);
+      const tasks = [
+        () => getData(weaponsURL),
+        () => getData(weaponsRegionsURL),
+        () => getData(weaponsModelsURL),
+        () => getData(weaponsYearsURL),
+      ];
+
+      const results = await executePromisesWithLimit(4, tasks);
+
+      const [weapons, weaponsRegions, weaponsModels, weaponsYears] =
+        results.map(({ value }) => value.data);
 
       const padWithZeros = (number, length) =>
         String(number).padStart(length, "0");
@@ -171,14 +211,6 @@ export default {
       const { query } = to;
       const { text = "" } = query;
 
-      const title = `Infohorizon: Пошук та Аналіз Зброї в Україні`;
-      const description = `Infohorizon надає доступ до деталізованої інформації про зброю, яка перебуває в розшуку в Україні через викрадення або втрату. Оглядайте статистику по регіонах та моделям, та дізнавайтеся, як купити доступ до нашого API.`;
-
-      head.addHeadObjs({
-        title,
-        meta: [description],
-      });
-
       return {
         weaponsRegions,
         weaponsModels,
@@ -193,6 +225,17 @@ export default {
     } catch (error) {
       return processNotFound(writeResponse, router);
     }
+  },
+  created() {
+    const title = `Infohorizon: Пошук та Аналіз Зброї в Україні`;
+    const description = `Infohorizon надає доступ до деталізованої інформації про зброю, яка перебуває в розшуку в Україні через викрадення або втрату. Оглядайте статистику по регіонах та моделям, та дізнавайтеся, як купити доступ до нашого API.`;
+
+    const meta = getMeta({ title, description, path: this.$route.path });
+
+    useHead({
+      title,
+      meta,
+    });
   },
   computed: {
     weaponsDateByWeekWidget() {

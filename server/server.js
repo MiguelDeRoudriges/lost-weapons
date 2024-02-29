@@ -8,7 +8,7 @@ dotenv.config({
   path: ".env",
 });
 
-const { PORT } = process.env;
+const { BASE_URL, PORT } = process.env;
 
 const app = express();
 
@@ -24,5 +24,5 @@ app.use(routes);
 connectDB();
 
 app.listen(PORT, () => {
-  console.log(`Server is listening on ${PORT}\n`);
+  console.log(`Server is listening on ${BASE_URL}\n`);
 });

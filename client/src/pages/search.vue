@@ -27,7 +27,9 @@ import { getHumanDate } from "@/utils/date.js";
 
 import { addToLocalStorage } from "@/utils/localeStorage.js";
 
-const weaponsURL = "http://backend:3000/weapons?";
+import { getMeta } from "@/utils/seo.js";
+
+const weaponsURL = "http://backend:3000/api/weapons?";
 const SEARCH_LIMIT = 12;
 
 const searchKeys = "weaponNumber,weaponSeries";
@@ -94,9 +96,11 @@ export default {
     const title = `Пошук ${text} за серію та (або) номер зброї на Infohorizon: Деталізована Інформація, історія використання і місцезнаходження втрачених або викрадених ${text}`;
     const description = `Знайдіть повну інформацію про модель ${text} в Україні на Infohorizon. Інформація про виробника, тип, вид, серію, номер, калібр, кількість стволів та рік виробництва. Отримайте доступ до бази даних зброї - Infohorizon.`;
 
+    const meta = getMeta({ title, description, path });
+
     useHead({
       title,
-      description,
+      meta,
       path,
     });
   },

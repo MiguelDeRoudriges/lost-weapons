@@ -112,8 +112,6 @@ export const getAllWeapons = async ({
   if (searchKeys && searchQuery) {
     const keysArray = searchKeys.split(",");
 
-    // console.log(keysArray);
-
     if (
       keysArray.includes("weaponNumber") &&
       keysArray.includes("weaponSeries")
@@ -131,7 +129,7 @@ export const getAllWeapons = async ({
         { weaponSeries: seriesPart },
       ];
 
-      console.log(conditions);
+      // console.log(conditions);
 
       const filterConditions = (condition) => {
         const [key] = Object.keys(condition);
@@ -152,7 +150,7 @@ export const getAllWeapons = async ({
     }
   }
 
-  console.log(match);
+  // console.log(match);
 
   const sortObject = {};
   if (sortKeys) {
@@ -162,8 +160,6 @@ export const getAllWeapons = async ({
   }
 
   const aggregationArray = [{ $match: match }];
-
-  console.log();
 
   if (Object.keys(sortObject).length > 0) {
     aggregationArray.push({ $sort: sortObject });
@@ -202,15 +198,7 @@ export const getAllWeapons = async ({
 export const getWeaponsRegionStatistics = async (req) => {
   const pipline = [
     {
-      $group: {
-        _id: `$organUnit`,
-        count: { $sum: 1 },
-      },
-    },
-    {
-      $sort: {
-        count: -1, // -1 for descending order
-      },
+      $sortByCount: "$organUnit",
     },
     {
       $project: {
@@ -228,15 +216,7 @@ export const getWeaponsRegionStatistics = async (req) => {
 export const getWeaponsModelsStatistics = async (req) => {
   const pipline = [
     {
-      $group: {
-        _id: `$brandModel`,
-        count: { $sum: 1 },
-      },
-    },
-    {
-      $sort: {
-        count: -1, // -1 for descending order
-      },
+      $sortByCount: "$brandModel",
     },
     {
       $project: {
