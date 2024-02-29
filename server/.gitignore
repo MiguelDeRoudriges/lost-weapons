@@ -8,4 +8,4 @@ node_modules
 logs
 *.log
 npm-debug.log*
-dist/build.mjs
+dist
