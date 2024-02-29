@@ -1,2 +1,4 @@
 downloads/
 .vscode/
+bash/constants.sh
+client/.env
