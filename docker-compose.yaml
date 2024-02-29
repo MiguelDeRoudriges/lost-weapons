@@ -1,17 +1,18 @@
 services:
+  proxy:
+    image: proxy
+    build:
+      context: ./nginx
+    ports:
+      - "8080:80"
   frontend:
     image: frontend
     build:
       context: ./client
-    ports:
-      - "80:8080"
-      - "4443:443"
   backend:
     image: backend
     build:
       context: ./server
-    ports:
-      - "3000:3000"
   mongodb:
     image: mongo:7.0.5
   scripts:
