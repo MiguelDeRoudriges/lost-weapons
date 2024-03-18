@@ -66,10 +66,10 @@ import { getMeta } from "@/utils/seo.js";
 
 import { useHead } from "@vueuse/head";
 
-const weaponsURL = "http://backend:3000/api/weapons";
-const weaponsRegionsURL = "http://backend:3000/api/weapons/regionStatistics";
-const weaponsModelsURL = "http://backend:3000/api/weapons/modelsStatistics";
-const weaponsYearsURL = "http://backend:3000/api/weapons/yearsStatistics";
+const weaponsURL = "https://infohorizon.yvhn.io/api/weapons";
+const weaponsRegionsURL = "https://infohorizon.yvhn.io/api/weapons/regionStatistics";
+const weaponsModelsURL = "https://infohorizon.yvhn.io/api/weapons/modelsStatistics";
+const weaponsYearsURL = "https://infohorizon.yvhn.io/api/weapons/yearsStatistics";
 
 const regionMapping = {
   ЛУГАНС: "ua-lh",
@@ -187,26 +187,34 @@ export default {
       );
       const invasionDate = formatDate(new Date(2022, 1, 24));
 
-      const {
-        data: { data: weaponsDateByWeek },
-      } = await getData(
-        `${weaponsURL}/newStatistics?dateFrom=${lastWeekDate}&dateTo=${todayDate}`
+      const fetchWeaponStats = async (url, dateFrom, dateTo) => {
+        const response = await getData(
+          `${url}/newStatistics?dateFrom=${dateFrom}&dateTo=${dateTo}`
+        );
+        return response.data.data;
+      };
+
+      const sumArray = (array) =>
+        array.reduce((partialSum, a) => partialSum + a, 0);
+
+      const weaponsDateByWeekPromise = fetchWeaponStats(
+        weaponsURL,
+        lastWeekDate,
+        todayDate
+      );
+      const weaponsSinceInvasionPromise = fetchWeaponStats(
+        weaponsURL,
+        invasionDate,
+        todayDate
       );
 
-      const {
-        data: { data: weaponsSinceInvasion },
-      } = await getData(
-        `${weaponsURL}/newStatistics?dateFrom=${invasionDate}&dateTo=${todayDate}`
-      );
+      const [weaponsDateByWeek, weaponsSinceInvasion] = await Promise.all([
+        weaponsDateByWeekPromise,
+        weaponsSinceInvasionPromise,
+      ]);
 
-      const weaponByDate = weaponsDateByWeek.reduce(
-        (partialSum, a) => partialSum + a,
-        0
-      );
-      const weaponSinceInvasion = weaponsSinceInvasion.reduce(
-        (partialSum, a) => partialSum + a,
-        0
-      );
+      const weaponByDate = sumArray(weaponsDateByWeek);
+      const weaponSinceInvasion = sumArray(weaponsSinceInvasion);
 
       const { query } = to;
       const { text = "" } = query;

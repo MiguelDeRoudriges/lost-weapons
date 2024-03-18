@@ -3,3 +3,4 @@ downloads
 bash/constants.sh
 client/.env
 server/dist
+client/dist

@@ -235,7 +235,7 @@ export const getNewWeaponsStatistics = async ({ dateFrom, dateTo }) => {
   const weaponsData = await getAggregatedNewWeaponsData(dateFrom, dateTo);
 
   const dateRange = createDateRange(dateFrom, dateTo);
-  const result = mapSubscriptionCounts(dateRange, weaponsData); // You may want to rename mapSubscriptionCounts to something more relevant, like mapWeaponCounts
+  const result = mapSubscriptionCounts(dateRange, weaponsData);
 
   return {
     pointStart: dateFrom,

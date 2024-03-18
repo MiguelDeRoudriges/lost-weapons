@@ -29,7 +29,7 @@ import { addToLocalStorage } from "@/utils/localeStorage.js";
 
 import { getMeta } from "@/utils/seo.js";
 
-const weaponsURL = "http://backend:3000/api/weapons?";
+const weaponsURL = "https://infohorizon.yvhn.io/api/weapons?";
 const SEARCH_LIMIT = 12;
 
 const searchKeys = "weaponNumber,weaponSeries";
