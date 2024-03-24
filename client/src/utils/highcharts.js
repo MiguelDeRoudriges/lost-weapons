@@ -119,6 +119,37 @@ export const translatedOptions = {
   printChart: "Надрукувати графік",
 };
 
+export const regionToChartValue = {
+  ЛУГАНС: "ua-lh",
+  СУМС: "ua-sm",
+  СЕВАСТОП: "ua-sc",
+  КИЇВСЬК: "ua-kv",
+  ЧЕРНІГІВ: "ua-ch",
+  ЧЕРКАС: "ua-ck",
+  ЧЕРНІВЕ: "ua-cv",
+  ДНІПРО: "ua-dp",
+  ДОНЕЦЬК: "ua-dt",
+  "ІВАНО-ФРАНКІВСЬК": "ua-if",
+  ХМЕЛЬНИЦЬК: "ua-km",
+  КІРОВОГРАД: "ua-kh",
+  МИКОЛАЇВ: "ua-mk",
+  ОДЕС: "ua-my",
+  ПОЛТАВ: "ua-pl",
+  РІВН: "ua-rv",
+  ВІННИЦ: "ua-vi",
+  ВОЛИНСЬК: "ua-vo",
+  ЗАКАРПАТ: "ua-zk",
+  ЗАПОРІ: "ua-zp",
+  ЖИТОМИР: "ua-zt",
+  ТЕРНОП: "ua-tp",
+  ХАРКІВ: "ua-kk",
+  ХЕРСОН: "ua-ks",
+  КИЇВ: "ua-kc",
+  КИЄВ: "ua-kc",
+  КРИМ: "ua-kr",
+  ЛЬВІВ: "ua-lv",
+};
+
 export function isMonochromatic(color) {
   const reRGBHex = /^(?:[0-9a-fA-F]{6})$/;
 

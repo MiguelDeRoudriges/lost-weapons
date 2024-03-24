@@ -110,60 +110,31 @@ export const getAllWeapons = async ({
   const match = {};
 
   if (searchKeys && searchQuery) {
-    const keysArray = searchKeys.split(",");
+    const ifEmptySetNotExists = (value) => (value ? value : { $exists: false });
 
-    if (
-      keysArray.includes("weaponNumber") &&
-      keysArray.includes("weaponSeries")
-    ) {
-      // Extract digits for weaponNumber
-      const numberPart = searchQuery.match(/\d+/)
-        ? searchQuery.match(/\d+/)[0]
-        : "";
+    const reDigits = /\d+/g;
 
-      // Extract non-digits for weaponSeries
-      const seriesPart = searchQuery.replace(/\d+/g, "");
+    const [numberPart] = searchQuery.match(reDigits) || [""];
 
-      const conditions = [
-        { weaponNumber: numberPart },
-        { weaponSeries: seriesPart },
-      ];
+    const seriesPart = searchQuery.replace(reDigits, "");
 
-      // console.log(conditions);
+    const conditions = [
+      { weaponNumber: ifEmptySetNotExists(numberPart) },
+      { weaponSeries: ifEmptySetNotExists(seriesPart) },
+    ];
 
-      const filterConditions = (condition) => {
-        const [key] = Object.keys(condition);
-        return condition[key] && condition[key].trim() !== "";
-      };
-
-      // // Показывает по любому номеру и любой серии
-      // match.$and = conditions.filter(filterConditions);
-
-      // Показывает только серия и номер, если нету одного из них, то ничего не показывает
-      match.$and = conditions;
-
-      // console.log(match);
-    } else {
-      match.$or = keysArray.map((key) => ({
-        [`${key.trim()}`]: searchQuery,
-      }));
-    }
+    match.$and = conditions;
   }
-
-  // console.log(match);
 
   const sortObject = {};
-  if (sortKeys) {
-    sortKeys.split(",").forEach((key) => {
-      sortObject[key.trim()] = sortDirection;
-    });
-  }
+  if (sortKeys) sortObject[sortKeys] = sortDirection;
 
   const aggregationArray = [{ $match: match }];
 
   if (Object.keys(sortObject).length > 0) {
     aggregationArray.push({ $sort: sortObject });
   }
+
   const facetObj = {
     paginatedResults: [],
     totalCount: [{ $count: "count" }],
@@ -172,9 +143,7 @@ export const getAllWeapons = async ({
   if (offset !== null) facetObj.paginatedResults.push({ $skip: offset });
   if (limit !== null) facetObj.paginatedResults.push({ $limit: limit });
 
-  if (offset !== null || limit !== null) {
-    aggregationArray.push({ $facet: facetObj });
-  }
+  aggregationArray.push({ $facet: facetObj });
 
   const aggregationResult = await WeaponModel.aggregate(
     aggregationArray

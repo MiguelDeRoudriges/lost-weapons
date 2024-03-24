@@ -63,11 +63,13 @@ end_time=$(date +%s)
 elapsed_time=$(($end_time - $start_time))
 echo "Total elapsed time for importing the file: $elapsed_time seconds"
 
+rm -rf $DATASET_DIRECTORY
+
 mongosh "${MONGODB_URL}" --eval "
   const stats = db.getSiblingDB('$DATABASE_NAME').stats();
   print('📊 Database statistics:');
   print('DB:', stats.db);
   print('Collections:', stats.collections, stats.collections === 1 ? '✅' : '⛔️'); 
   print('Documents:', stats.objects);
-  print('Indexes:', stats.indexes, stats.indexes === 8 ? '8' : '⛔️');
+  print('Indexes:', stats.indexes, stats.indexes === 9 ? '9' : '⛔️');
 "

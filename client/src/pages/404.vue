@@ -5,7 +5,7 @@
       .text-center.p-4
         a(href="/")
           img(
-            src="/public/infogorizon.svg",
+            src="/infohorizon.svg",
             width="166",
             height="32"
           )

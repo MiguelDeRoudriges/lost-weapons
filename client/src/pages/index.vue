@@ -1,56 +1,57 @@
 <template lang="pug">
-div
-  .container.py-3.px-3(v-cloak)
-    .mx-auto.max-w-md
-      search-form(@submit-search="getAPIrequest", :initial-text="text")
-      .small.text-balck-50.p-3(v-if="$route.path === '/'")
-        | Наприклад:
-        = " "
-        a(
-          href="/search?q=36ЛЯ"
-        )
-          | 36ЛЯ 
-        span або
-        a.ms-1(href="/search?q=531178") 531178
-    .p-3
-    .row.g-4
-      .col(v-for="widget in weaponsDateByWeekWidget")
-        digits-widget(:options="widget")
-    .p-2
-    .row.g-3
-      .col-12.col-md-6
-        map-chart(
-          :map-data="transformData(weaponsRegions, regionMapping)",
-          title="Розподіл зброї по Регіонах",
-          subtitle="Статистика зброї за регіонами України",
-          :disable-data-labels="false",
-        )
-      .col-12.col-md-6
-        chart(
-          :idKey="'chartPie'",
-          title="Розподіл зброї за Моделями",
-          subtitle="Аналіз топ 10 загубленних моделей зброї",
-          chart-type="pie",
-          :chart-height="450",
-          :series="mapIndustriesSeries(weaponsModels)"
-        )
-      .col-12.col-md-12
-        chart(
-          :idKey="'columnChart'",
-          title="Розподіл зброї за Роками",
-          subtitle="Аналіз загубленних моделей зброї за роками",
-          point-interval-unit="year"
-          :series="mapYearsSeries(weaponsYears)"
-        )
-    .p-5.p-md-5
-      .text-center 
-        h1 Як купити API
-        p.lead Корпоративні сервіси Infohorizon
-        connection-button
-    feature-list.g-3(:features="benefits")
+.container.py-3.px-3(v-cloak)
+  .mx-auto.max-w-md
+    search-form(@submit-search="getAPIrequest", :initial-text="text")
+    .small.text-balck-50.p-3(v-if="$route.path === '/'")
+      | Наприклад:
+      = " "
+      a(
+        href="/search?q=36ЛЯ"
+      )
+        | 36ЛЯ 
+      span або
+      a.ms-1(href="/search?q=531178") 531178
+  .p-3
+  .row.g-4
+    .col(v-for="widget in weaponsDateByWeekWidget")
+      digits-widget(:options="widget")
+  .p-2
+  .row.g-3
+    .col-12.col-md-6
+      map-chart(
+        :map-data="transformData(weaponsRegions, regionToChartValue)",
+        title="Розподіл зброї по Регіонах",
+        subtitle="Статистика зброї за регіонами України",
+        :disable-data-labels="false",
+      )
+    .col-12.col-md-6
+      chart(
+        :idKey="'chartPie'",
+        title="Розподіл зброї за Моделями",
+        subtitle="Аналіз топ 10 загубленних моделей зброї",
+        chart-type="pie",
+        :chart-height="450",
+        :series="mapIndustriesSeries(weaponsModels)"
+      )
+    .col-12.col-md-12
+      chart(
+        :idKey="'columnChart'",
+        title="Розподіл зброї за Роками",
+        subtitle="Аналіз загубленних моделей зброї за роками",
+        point-interval-unit="year"
+        :series="mapYearsSeries(weaponsYears)"
+      )
+  .p-5.p-md-5
+    .text-center 
+      h1 Як купити API
+      p.lead Корпоративні сервіси Infohorizon
+      connection-button
+  feature-list.g-3(:features="benefits")
 </template>
 
 <script>
+import { useHead } from "@vueuse/head";
+
 import SearchForm from "@/components/SearchForm.vue";
 import MapChart from "@/components/MapChart.vue";
 import Chart from "@/components/Chart.vue";
@@ -60,47 +61,17 @@ import ConnectionButton from "@/components/ConnectionButton.vue";
 
 import { getData } from "@/services/api/http.js";
 
-import { addToLocalStorage } from "@/utils/localeStorage.js";
-
 import { getMeta } from "@/utils/seo.js";
 
-import { useHead } from "@vueuse/head";
+import { executePromisesWithLimit } from "@/utils/helpers.js";
+import { regionToChartValue } from "@/utils/highcharts.js";
 
-const weaponsURL = "https://infohorizon.yvhn.io/api/weapons";
-const weaponsRegionsURL = "https://infohorizon.yvhn.io/api/weapons/regionStatistics";
-const weaponsModelsURL = "https://infohorizon.yvhn.io/api/weapons/modelsStatistics";
-const weaponsYearsURL = "https://infohorizon.yvhn.io/api/weapons/yearsStatistics";
+const { VITE_BASE_DOMAIN: BASE_DOMAIN } = import.meta.env;
 
-const regionMapping = {
-  ЛУГАНС: "ua-lh",
-  СУМС: "ua-sm",
-  СЕВАСТОП: "ua-sc",
-  КИЇВСЬК: "ua-kv",
-  ЧЕРНІГІВ: "ua-ch",
-  ЧЕРКАС: "ua-ck",
-  ЧЕРНІВЕ: "ua-cv",
-  ДНІПРО: "ua-dp",
-  ДОНЕЦЬК: "ua-dt",
-  "ІВАНО-ФРАНКІВСЬК": "ua-if",
-  ХМЕЛЬНИЦЬК: "ua-km",
-  КІРОВОГРАД: "ua-kh",
-  МИКОЛАЇВ: "ua-mk",
-  ОДЕС: "ua-my",
-  ПОЛТАВ: "ua-pl",
-  РІВН: "ua-rv",
-  ВІННИЦ: "ua-vi",
-  ВОЛИНСЬК: "ua-vo",
-  ЗАКАРПАТ: "ua-zk",
-  ЗАПОРІ: "ua-zp",
-  ЖИТОМИР: "ua-zt",
-  ТЕРНОП: "ua-tp",
-  ХАРКІВ: "ua-kk",
-  ХЕРСОН: "ua-ks",
-  КИЇВ: "ua-kc",
-  КИЄВ: "ua-kc",
-  КРИМ: "ua-kr",
-  ЛЬВІВ: "ua-lv",
-};
+const weaponsURL = `${BASE_DOMAIN}/api/weapons`;
+const weaponsRegionsURL = `${weaponsURL}/regionStatistics`;
+const weaponsModelsURL = `${weaponsURL}/modelsStatistics`;
+const weaponsYearsURL = `${weaponsURL}/yearsStatistics`;
 
 function processNotFound(writeResponse, router) {
   router.push({ name: "NotFound" });
@@ -115,35 +86,6 @@ function error({ writeResponse, code }) {
   return { status: code };
 }
 
-async function executePromisesWithLimit(concurrency, tasks) {
-  try {
-    const taskChunks = Array(Math.ceil(tasks.length / concurrency))
-      .fill()
-      .map((_, index) =>
-        tasks.slice(index * concurrency, (index + 1) * concurrency)
-      );
-
-    const results = [];
-    for (const chunk of taskChunks) {
-      const batchResults = await Promise.allSettled(
-        chunk.map((task) => task())
-      );
-
-      const modifiedResults = batchResults.map((result) =>
-        result.status === "rejected"
-          ? { ...result, message: result.reason.message }
-          : result
-      );
-
-      results.push(...modifiedResults);
-    }
-    return results;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-}
-
 export default {
   components: {
     SearchForm,
@@ -155,6 +97,8 @@ export default {
   },
   async prefetch({ to, router, writeResponse }) {
     try {
+      const startTime = performance.now();
+
       const tasks = [
         () => getData(weaponsURL),
         () => getData(weaponsRegionsURL),
@@ -216,8 +160,11 @@ export default {
       const weaponByDate = sumArray(weaponsDateByWeek);
       const weaponSinceInvasion = sumArray(weaponsSinceInvasion);
 
-      const { query } = to;
-      const { text = "" } = query;
+      const { text = "" } = to.query;
+
+      const endTime = performance.now();
+      const executionTime = ((endTime - startTime) / 1000).toFixed(2);
+      console.log(`Fetching time: ${executionTime} milliseconds`);
 
       return {
         weaponsRegions,
@@ -226,7 +173,7 @@ export default {
         weaponSinceInvasion,
         weaponsYears,
         count: weapons.count,
-        regionMapping,
+        regionToChartValue,
         text,
         status: 200,
       };
@@ -292,15 +239,8 @@ export default {
     async getAPIrequest(input) {
       this.query = this.getUrlQueryType(input);
 
-      if (input) {
+      if (input)
         window.location.assign("/search?" + new URLSearchParams({ q: input }));
-      }
-
-      addToLocalStorage("weaponsSuggests", {
-        text: this.query.text,
-        type:
-          this.query.type === "number" ? "За номером" : "За серією і номером",
-      });
     },
     mapYearsSeries(data) {
       const last20Data = data.slice(-11);
@@ -332,13 +272,13 @@ export default {
         },
       ];
     },
-    transformData(data, regionMapping) {
-      const initializeRegionCounts = (regionMapping) => {
-        return new Map(Object.values(regionMapping).map((code) => [code, 0]));
+    transformData(data, regionToChartValue) {
+      const initializeRegionCounts = (regionsConfig) => {
+        return new Map(Object.values(regionsConfig).map((code) => [code, 0]));
       };
 
-      const generateRegexPattern = (regionMapping) => {
-        const regionsBase = Object.keys(regionMapping).join("|");
+      const generateRegexPattern = (regionsConfig) => {
+        const regionsBase = Object.keys(regionsConfig).join("|");
         return new RegExp(`(${regionsBase})`, "iu");
       };
 
@@ -346,13 +286,13 @@ export default {
         regionCounts,
         item,
         regexPattern,
-        regionMapping
+        regionsConfig
       ) => {
         const match = item.organUnit?.match(regexPattern);
         if (match && match[0]) {
           const regionName =
             match[0].toUpperCase() + (match[0].endsWith("Ь") ? "К" : "");
-          const regionCode = regionMapping[regionName];
+          const regionCode = regionsConfig[regionName];
           if (regionCode) {
             return new Map(regionCounts).set(
               regionCode,
@@ -363,12 +303,12 @@ export default {
         return regionCounts;
       };
 
-      const regionCounts = initializeRegionCounts(regionMapping);
-      const regexPattern = generateRegexPattern(regionMapping);
+      const regionCounts = initializeRegionCounts(regionToChartValue);
+      const regexPattern = generateRegexPattern(regionToChartValue);
 
       const finalRegionCounts = data.reduce(
         (counts, item) =>
-          updateRegionCounts(counts, item, regexPattern, regionMapping),
+          updateRegionCounts(counts, item, regexPattern, regionToChartValue),
         regionCounts
       );
 

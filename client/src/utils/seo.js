@@ -26,15 +26,15 @@ export function getMeta({ title, description, path }) {
     },
     {
       property: "og:image",
-      content: "https://infohorizon.yvhn.io/infogorizon.svg",
+      content: "https://infohorizon.yvhn.io/infohorizon.svg",
     },
     {
       property: "og:image:secure_url",
-      content: "https://infohorizon.yvhn.io/infogorizon.svg",
+      content: "https://infohorizon.yvhn.io/infohorizon.svg",
     },
     {
       name: "twitter:image",
-      content: "https://infohorizon.yvhn.io/infogorizon.svg",
+      content: "https://infohorizon.yvhn.io/infohorizon.svg",
     },
     {
       name: "twitter:card",

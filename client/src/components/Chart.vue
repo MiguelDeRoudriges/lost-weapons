@@ -81,7 +81,7 @@ export default {
   computed: {
     computedLogotype() {
       return {
-        url: "/infogorizon.svg",
+        url: "/infohorizon.svg",
         width: 240,
         height: 30,
       };

@@ -8,11 +8,11 @@
       span(v-if="count > 0") Знайдено {{ formatNumber(count) }} {{ declension(count, ["одиниця", "одиниці", "одиниць"]) }}
       span(v-else) Моделей зброї не знайдено
     .p-0
-    h1.mb-0 Моделі зброї
+    h2.mb-0 Моделі зброї
   .p-lg-3.rounded-3.mb-2
     .row.row-cols-1.row-cols-md-2.g-3
       .col(v-for="weapon in formatCards(weapons)")
-        cards(:options="weapon", :showPlaceholders="isLoading")
+        cards(:options="weapon")
   .p-3
 </template>
 
@@ -29,10 +29,10 @@ import { addToLocalStorage } from "@/utils/localeStorage.js";
 
 import { getMeta } from "@/utils/seo.js";
 
-const weaponsURL = "https://infohorizon.yvhn.io/api/weapons?";
-const SEARCH_LIMIT = 12;
+const { VITE_BASE_DOMAIN: BASE_DOMAIN } = import.meta.env;
 
-const searchKeys = "weaponNumber,weaponSeries";
+const weaponsURL = `${BASE_DOMAIN}/api/weapons?`;
+const SEARCH_LIMIT = 12;
 
 function processNotFound(writeResponse, router) {
   router.push({ name: "NotFound" });
@@ -47,6 +47,13 @@ function error({ writeResponse, code }) {
   return { status: code };
 }
 
+const getSearchKey = (text) => {
+  const reNumber = /^\d+$/;
+
+  const isNumber = reNumber.test(text);
+  return isNumber ? "weaponNumber" : "weaponNumber,weaponSeries";
+};
+
 export default {
   components: {
     Cards,
@@ -56,44 +63,44 @@ export default {
     try {
       const { query } = to;
 
+      const { q: searchText = "" } = query;
+
       let searchURL = weaponsURL;
 
       const offset = query.offset || 0;
 
-      const getSearchKey = (text) => {
-        const isNumber = /^\d+$/.test(text);
-        return isNumber ? "weaponNumber" : "weaponNumber,weaponSeries";
-      };
-
       const params = {
-        searchQuery: query.q || "",
-        searchKeys: getSearchKey(query.q),
+        searchQuery: searchText,
+        searchKeys: getSearchKey(searchText),
         limit: SEARCH_LIMIT,
         offset,
+        sortKeys: "theftDate",
+        sortDirection: "DESC",
       };
 
       const {
         data: { data, count },
       } = await getData(searchURL, params);
 
-      return { weapons: data, count, searchText: query.q || "", status: 200 };
+      return { weapons: data, count, searchText, status: 200 };
     } catch (e) {
       return processNotFound(writeResponse, router);
     }
   },
   data() {
     return {
-      isLoading: false,
       timeoutID: -1,
       placeholder: "Введіть серію та (або) номер зброї",
     };
   },
   created() {
+    if (!this.weapons.length) return;
+
     const text = this.$route.query.q || "";
 
     const { path } = this.$route;
 
-    const title = `Пошук ${text} за серію та (або) номер зброї на Infohorizon: Деталізована Інформація, історія використання і місцезнаходження втрачених або викрадених ${text}`;
+    const title = `Пошук ${text} за серію та (або) номер зброї на Infohorizon: Деталізована Інформація, історія використання і місцезнаходження втрачених або викрадених моделей зброї`;
     const description = `Знайдіть повну інформацію про модель ${text} в Україні на Infohorizon. Інформація про виробника, тип, вид, серію, номер, калібр, кількість стволів та рік виробництва. Отримайте доступ до бази даних зброї - Infohorizon.`;
 
     const meta = getMeta({ title, description, path });
@@ -104,19 +111,24 @@ export default {
       path,
     });
   },
+  mounted() {
+    if (!this.weapons.length) return;
+
+    const text = this.$route.query.q || "";
+
+    this.query = this.getUrlQueryType(text);
+
+    addToLocalStorage("weaponsSuggests", {
+      text: this.query.text,
+      type: this.query.type === "number" ? "За номером" : "За серією і номером",
+    });
+  },
   methods: {
     async getAPIrequest(input) {
       this.query = this.getUrlQueryType(input);
 
-      if (input) {
+      if (input)
         window.location.assign("/search?" + new URLSearchParams({ q: input }));
-      }
-
-      addToLocalStorage("weaponsSuggests", {
-        text: this.query.text,
-        type:
-          this.query.type === "number" ? "За номером" : "За серією і номером",
-      });
     },
     getUrlQueryType(text) {
       const isNumber = /^\d+$/.test(text);
@@ -135,6 +147,11 @@ export default {
     formatCards(cards) {
       if (!cards) return [];
 
+      const getWeaponKeys = (weaponNumber, weaponSeries) => ({
+        title: weaponSeries ? "Серія та номер зброї" : "Номер зброї",
+        text: weaponSeries ? `${weaponSeries}${weaponNumber}` : weaponNumber,
+      });
+
       const mapCards = (card) => {
         const {
           brandModel,
@@ -152,12 +169,7 @@ export default {
 
         return {
           title: { text: weaponKind + " " + brandModel },
-          subtitle: {
-            title: "Номер зброї",
-            text: weaponSeries
-              ? `${weaponNumber}${weaponSeries}`
-              : `${weaponNumber}`,
-          },
+          subtitle: getWeaponKeys(weaponNumber, weaponSeries),
           paragraphs: [
             {
               subtitle: "Калібр",
@@ -205,6 +217,6 @@ export default {
 .max-w-md
   max-width: 720px
 
-h1
+h2
   font-size: calc(0.9rem + 1vw)
 </style>

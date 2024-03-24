@@ -38,13 +38,14 @@
                 )
   template(v-else)
     .card-body.d-flex.flex-column
-      h2.fs-6.fw-medium.card-title(v-if="options.title")
+      h3.fs-4.fw-medium.card-title(v-if="options.title")
         span(v-if="!options.title.link") {{ options.title.text }}
         a.text-decoration-none(v-else :href="options.title.link") {{ options.title.text }}
       p(v-if="options.subtitle") 
         span.small.text-black-50.me-2(v-if="options.subtitle.title") {{ options.subtitle.title }}:
         span {{ options.subtitle.text }}
       .mt-auto
+        .row
         template(v-for="paragraph in options.paragraphs")
           div(v-if="paragraph.text && paragraph.text.value" )
             span.small.text-black-50.me-2(v-if="paragraph.subtitle") {{ paragraph.subtitle }}:
@@ -88,4 +89,3 @@ a:visited
   &:not(:last-of-type)
     margin-right: 0.375rem
 </style>
-  

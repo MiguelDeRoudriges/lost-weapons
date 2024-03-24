@@ -2,7 +2,7 @@
 header.navbar.navbar-expand.navbar-light.flex-column.flex-lg-row.py-lg-3.py-2
   a.navbar-brand.me-0.me-lg-auto(href="/")
     img.logo-light(
-      src="/public/infogorizon.svg",
+      src="/infohorizon.svg",
       height="32",
       width="166",
       alt="Infohorizon — Державний реєстр загубленої зброї"

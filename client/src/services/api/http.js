@@ -1,4 +1,4 @@
-export async function getData(endpoint, options, url, headers = {}) {
+export async function getData(endpoint, options, headers = {}) {
   const searchParams = new URLSearchParams(options);
 
   try {

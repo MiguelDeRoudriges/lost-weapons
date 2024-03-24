@@ -9,7 +9,6 @@ import theMap from "@/assets/map-options.json";
 
 import Highcharts from "highcharts";
 import Maps from "highcharts/modules/map";
-import Accessibility from "highcharts/modules/accessibility";
 
 import { generalOptions } from "@/utils/highcharts.js";
 
@@ -66,7 +65,7 @@ export default {
   computed: {
     computedLogotype() {
       return {
-        url: "/infogorizon.svg",
+        url: "/infohorizon.svg",
         width: 240,
         height: 30,
       };
@@ -158,7 +157,6 @@ export default {
   },
   mounted() {
     Maps(Highcharts);
-    Accessibility(Highcharts);
 
     Highcharts.setOptions(generalOptions);
 

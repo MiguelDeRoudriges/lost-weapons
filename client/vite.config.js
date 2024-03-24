@@ -12,6 +12,13 @@ export default defineConfig(() => ({
   ssr: { format: "cjs" },
   plugins: [
     viteSSR(),
-    vue({ ssr: true }),
+    vue({
+      ssr: true,
+      template: {
+        transformAssetUrls: {
+          includeAbsolute: false,
+        },
+      },
+    }),
   ],
 }));
